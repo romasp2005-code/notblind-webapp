@@ -125,15 +125,15 @@
 
         <!-- PRIMARY ACTION BUTTONS (CUSTOM COLORED) -->
         <div class="grid grid-cols-2 gap-3">
-            <!-- GREEN BUTTON (Connect Link) -->
-            <a href="tg://settings/edit" class="glass-card-interactive bg-emerald-700/90 hover:bg-emerald-600 active:bg-emerald-800 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30 text-sm">
+            <!-- GREEN BUTTON (Connect Link - Fixed with openConnectLink) -->
+            <button onclick="openConnectLink()" class="glass-card-interactive bg-emerald-700/90 hover:bg-emerald-600 active:bg-emerald-800 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30 text-sm cursor-pointer">
                 <i class="ph-bold ph-shield-check text-lg"></i>
                 <span>Подключить</span>
                 <i class="ph-bold ph-arrow-up-right text-xs opacity-75"></i>
-            </a>
+            </button>
 
             <!-- RED / WINE BUTTON (Tutorial Modal) -->
-            <button onclick="openModal('tutorialModal')" class="glass-card-interactive bg-rose-800/90 hover:bg-rose-700 active:bg-rose-900 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-950/40 border border-rose-500/30 text-sm">
+            <button onclick="openModal('tutorialModal')" class="glass-card-interactive bg-rose-800/90 hover:bg-rose-700 active:bg-rose-900 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-950/40 border border-rose-500/30 text-sm cursor-pointer">
                 <i class="ph-bold ph-gear-six text-lg"></i>
                 <span>Инструкция</span>
             </button>
@@ -162,7 +162,7 @@
                     <span class="text-[11px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20 font-medium">Без ограничений</span>
                 </div>
                 <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                    Выберите подходящий период доступа для сохранения всех удаленных и измененных сообщений.
+                    Выберите подходящий период доступа для сохранения всех удаленных и измененных сообщений из бизнес-чатов.
                 </p>
 
                 <!-- TARIFF CARDS -->
@@ -215,7 +215,7 @@
 
                 <!-- TRIAL BUTTON -->
                 <div class="mt-4 pt-3 border-t border-slate-800">
-                    <button id="trialBtn" onclick="activateTrial()" class="w-full glass-card-interactive bg-gradient-to-r from-rose-900 to-red-800 hover:from-rose-800 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg border border-rose-500/30 text-xs">
+                    <button id="trialBtn" onclick="activateTrial()" class="w-full glass-card-interactive bg-gradient-to-r from-rose-900 to-red-800 hover:from-rose-800 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg border border-rose-500/30 text-xs cursor-pointer">
                         <i class="ph-bold ph-gift text-base"></i>
                         <span id="trialBtnText">Активировать пробный период на 24 часа</span>
                     </button>
@@ -285,10 +285,10 @@
 
                 <!-- DEMO CONTROLS -->
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="triggerDemoEdit()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-sky-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5">
+                    <button onclick="triggerDemoEdit()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-sky-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="ph-bold ph-pencil-simple"></i> Тест редактирования
                     </button>
-                    <button onclick="triggerDemoDelete()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5">
+                    <button onclick="triggerDemoDelete()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="ph-bold ph-trash"></i> Тест удаления
                     </button>
                 </div>
@@ -312,7 +312,7 @@
     <!-- MODAL 1: PAYMENT CONFIRMATION -->
     <div id="payModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="glass-card bg-slate-900 rounded-2xl max-w-xs w-full p-5 border border-slate-700 shadow-2xl relative animate-fade-in">
-            <button onclick="closeModal('payModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1">
+            <button onclick="closeModal('payModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 cursor-pointer">
                 <i class="ph-bold ph-x text-lg"></i>
             </button>
 
@@ -330,10 +330,10 @@
             </div>
 
             <div class="space-y-2">
-                <button onclick="executePayment()" class="w-full glass-card-interactive bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg text-xs">
+                <button onclick="executePayment()" class="w-full glass-card-interactive bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg text-xs cursor-pointer">
                     <i class="ph-bold ph-lock-key"></i> Перейти к оплате через Rollypay
                 </button>
-                <button onclick="closeModal('payModal')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-4 rounded-xl text-xs">
+                <button onclick="closeModal('payModal')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-4 rounded-xl text-xs cursor-pointer">
                     Отмена
                 </button>
             </div>
@@ -343,7 +343,7 @@
     <!-- MODAL 2: TUTORIAL / GUIDANCE -->
     <div id="tutorialModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="glass-card bg-slate-900 rounded-2xl max-w-xs w-full p-5 border border-slate-700 shadow-2xl relative">
-            <button onclick="closeModal('tutorialModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1">
+            <button onclick="closeModal('tutorialModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 cursor-pointer">
                 <i class="ph-bold ph-x text-lg"></i>
             </button>
 
@@ -368,7 +368,7 @@
                 </div>
             </div>
 
-            <button onclick="closeModal('tutorialModal')" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs">
+            <button onclick="closeModal('tutorialModal')" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs cursor-pointer">
                 Понятно, спасибо
             </button>
         </div>
@@ -383,6 +383,16 @@
             tg.expand();
             tg.setHeaderColor('#0f172a');
             tg.setBackgroundColor('#0f172a');
+        }
+
+        // Fix for opening Telegram settings link (`tg://settings/edit`)
+        function openConnectLink() {
+            const link = "tg://settings/edit";
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink(link);
+            } else {
+                window.location.href = link;
+            }
         }
 
         // State Management
