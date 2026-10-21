@@ -1,322 +1,539 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NotBlind Panel</title>
+    <title>NotBlind — Управление автоответом и мониторингом</title>
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.85);
-            --card-border: rgba(51, 65, 85, 0.6);
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --accent-green: #10b981;
-            --accent-green-hover: #059669;
-            --accent-red: #be123c;
-            --accent-red-hover: #9f1239;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 16px;
-            max-width: 480px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
-
-        /* Карточки */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-        }
-
-        /* Шапка */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .user-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-        .sub-badge {
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-top: 2px;
-        }
-        .status-pill {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        /* Навигация */
-        .tabs {
-            display: flex;
-            background: rgba(30, 41, 59, 0.6);
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid var(--card-border);
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active {
-            background: var(--accent-green);
-            color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
-        }
-
-        /* Кнопки действий */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            margin-top: 8px;
-        }
-        .btn-green {
-            background: var(--accent-green);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        .btn-green:active { background: var(--accent-green-hover); }
-
-        .btn-red {
-            background: var(--accent-red);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
-        }
-        .btn-red:active { background: var(--accent-red-hover); }
-
-        .card-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        .card-desc {
-            font-size: 12px;
-            color: var(--text-sub);
-            line-height: 1.4;
-        }
-
-        /* Переключатель (Toggle) */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 26px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #334155;
-            transition: .3s;
-            border-radius: 26px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px; width: 20px;
-            left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--accent-green); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* Тарифы */
-        .tariff-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: rgba(51, 65, 85, 0.4);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .tariff-item:hover { background: rgba(51, 65, 85, 0.7); }
-        .price { font-weight: 700; color: var(--accent-green); font-size: 14px; }
-        .discount {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-green);
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 6px;
-            margin-left: 4px;
-        }
-
-        .hidden { display: none !important; }
-    </style>
-</head>
-<body>
-
-    <!-- Шапка -->
-    <div class="card header">
-        <div>
-            <div id="username" class="user-title">Загрузка...</div>
-            <div class="sub-badge">Статус: <span style="color: var(--accent-green); font-weight: 600;">Активна ✅</span></div>
-        </div>
-        <div class="status-pill">ONLINE</div>
-    </div>
-
-    <!-- Табы -->
-    <div class="tabs">
-        <button onclick="switchTab('main')" id="btn-main" class="tab-btn active">Главная</button>
-        <button onclick="switchTab('tariffs')" id="btn-tariffs" class="tab-btn">Тарифы</button>
-        <button onclick="switchTab('tutorial')" id="btn-tutorial" class="tab-btn">Инструкция</button>
-    </div>
-
-    <!-- Вкладка: Главная -->
-    <div id="tab-main">
-        <div class="card">
-            <div class="card-title">🛡️ Быстрое подключение</div>
-            <div class="card-desc">Перейдите в настройки Telegram для подключения привязки авто-чата.</div>
-            <a href="tg://settings/edit" class="btn btn-green">Подключить бота ↗</a>
-        </div>
-
-        <div class="card toggle-row">
-            <div>
-                <div class="card-title">📍 Фильтр live-локации</div>
-                <div class="card-desc">Игнорировать смену координат</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" checked onchange="toggleLiveLoc()">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🎁 Пробный период</div>
-            <div class="card-desc">Активируйте 24 часа бесплатного тестирования системы.</div>
-            <button onclick="activateTrial()" class="btn btn-red">Активировать тест на 24 часа</button>
-        </div>
-    </div>
-
-    <!-- Вкладка: Тарифы -->
-    <div id="tab-tariffs" class="hidden">
-        <div class="card">
-            <div class="card-title" style="margin-bottom: 12px;">💎 Подписка NotBlind</div>
-            
-            <div class="tariff-item" onclick="selectTariff(1, 49)">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px;">1 месяц</div>
-                    <div class="card-desc">31 день доступа</div>
-                </div>
-                <div class="price">49 ₽</div>
-            </div>
-
-            <div class="tariff-item" onclick="selectTariff(3, 129)">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px;">3 месяца <span class="discount">-10%</span></div>
-                    <div class="card-desc">90 дней доступа</div>
-                </div>
-                <div class="price">129 ₽</div>
-            </div>
-
-            <div class="tariff-item" onclick="selectTariff(12, 529)">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px;">12 месяцев <span class="discount">-10%</span></div>
-                    <div class="card-desc">365 дней доступа</div>
-                </div>
-                <div class="price">529 ₽</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Вкладка: Инструкция -->
-    <div id="tab-tutorial" class="hidden">
-        <div class="card">
-            <div class="card-title" style="margin-bottom: 8px;">⚙️ Пошаговый старт</div>
-            <div class="card-desc" style="line-height: 1.6;">
-                1. Нажмите зеленую кнопку <b>«Подключить»</b>.<br>
-                2. Перейдите в раздел <b>«Чат-автоматизация»</b>.<br>
-                3. Укажите имя вашего бота для авторизации аккаунта.
-            </div>
-        </div>
-    </div>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        tg: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            cardHover: '#334155',
+                            border: '#334155',
+                            primary: '#3b82f6',
+                            greenBtn: '#15803d',
+                            greenBtnHover: '#166534',
+                            redBtn: '#991b1b',
+                            redBtnHover: '#7f1d1d',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('username').innerText = '@' + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
-        } else {
-            document.getElementById('username').innerText = 'Пользователь';
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
-        function switchTab(tab) {
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light');
-            ['main', 'tariffs', 'tutorial'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('btn-' + t).classList.remove('active');
+        /* Glassmorphism effects */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-interactive {
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-card-interactive:active {
+            transform: scale(0.98);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        /* Simulated chat message bubble styling */
+        .chat-bubble {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom toggle switch styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #38bdf8;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #0284c7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-6 px-4 pt-4 max-w-md mx-auto">
+
+    <!-- TOP HEADER / PROFILE STATUS -->
+    <header class="w-full mb-4">
+        <div class="glass-card rounded-2xl p-4 flex items-center justify-between shadow-xl">
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div id="userAvatar" class="w-12 h-12 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-md uppercase">
+                        NB
+                    </div>
+                    <span id="statusIndicator" class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                </div>
+                <div>
+                    <h2 id="userName" class="text-base font-bold text-slate-100 flex items-center gap-1.5 leading-tight">
+                        Загрузка...
+                    </h2>
+                    <p id="userId" class="text-xs text-slate-400 font-mono mt-0.5">ID: ------</p>
+                </div>
+            </div>
+
+            <div class="text-right">
+                <span id="subBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <i class="ph-bold ph-check-circle mr-1"></i> Активна
+                </span>
+                <p id="subExpireText" class="text-[10px] text-slate-400 mt-1">Осталось: -- ч.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY CONTENT CONTAINER -->
+    <main class="w-full flex-1 space-y-4">
+
+        <!-- PRIMARY ACTION BUTTONS (CUSTOM COLORED) -->
+        <div class="grid grid-cols-2 gap-3">
+            <!-- GREEN BUTTON (Connect Link) -->
+            <a href="tg://settings/edit" class="glass-card-interactive bg-emerald-700/90 hover:bg-emerald-600 active:bg-emerald-800 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30 text-sm">
+                <i class="ph-bold ph-shield-check text-lg"></i>
+                <span>Подключить</span>
+                <i class="ph-bold ph-arrow-up-right text-xs opacity-75"></i>
+            </a>
+
+            <!-- RED / WINE BUTTON (Tutorial Modal) -->
+            <button onclick="openModal('tutorialModal')" class="glass-card-interactive bg-rose-800/90 hover:bg-rose-700 active:bg-rose-900 text-white font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-950/40 border border-rose-500/30 text-sm">
+                <i class="ph-bold ph-gear-six text-lg"></i>
+                <span>Инструкция</span>
+            </button>
+        </div>
+
+        <!-- QUICK TAB SELECTOR -->
+        <div class="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs font-medium">
+            <button id="tabBtnTariffs" onclick="switchTab('tariffs')" class="flex-1 py-2 rounded-lg text-center font-semibold transition-all bg-sky-500 text-white shadow">
+                <i class="ph-bold ph-sketch-logo mr-1"></i>Тарифы
+            </button>
+            <button id="tabBtnSettings" onclick="switchTab('settings')" class="flex-1 py-2 rounded-lg text-center font-semibold transition-all text-slate-400 hover:text-slate-200">
+                <i class="ph-bold ph-sliders-horizontal mr-1"></i>Настройки
+            </button>
+            <button id="tabBtnDemo" onclick="switchTab('demo')" class="flex-1 py-2 rounded-lg text-center font-semibold transition-all text-slate-400 hover:text-slate-200">
+                <i class="ph-bold ph-play-circle mr-1"></i>Демонстрация
+            </button>
+        </div>
+
+        <!-- TAB 1: TARIFFS & SUBSCRIPTION -->
+        <section id="tabTariffs" class="space-y-3">
+            <div class="glass-card rounded-2xl p-4 border border-slate-800">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i class="ph-fill ph-crown text-amber-400 text-lg"></i> Подписка NotBlind
+                    </h3>
+                    <span class="text-[11px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/20 font-medium">Без ограничений</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                    Выберите подходящий период доступа для сохранения всех удаленных и измененных сообщений из бизнес-чатов.
+                </p>
+
+                <!-- TARIFF CARDS -->
+                <div class="space-y-2.5">
+                    <!-- 1 MONTH -->
+                    <div onclick="selectTariff('1', 49, '1 месяц (31 день)')" class="glass-card-interactive glass-card rounded-xl p-3.5 flex items-center justify-between border border-slate-700/60 hover:border-sky-500/50 cursor-pointer">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-100 text-sm">1 месяц</span>
+                                <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">31 день</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Базовый период тестирования</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-extrabold text-sky-400">49 ₽</span>
+                        </div>
+                    </div>
+
+                    <!-- 3 MONTHS (-10%) -->
+                    <div onclick="selectTariff('3', 129, '3 месяца (-10%)')" class="glass-card-interactive glass-card rounded-xl p-3.5 flex items-center justify-between border border-sky-500/40 bg-sky-950/20 relative overflow-hidden cursor-pointer">
+                        <div class="absolute -right-6 -top-6 w-12 h-12 bg-sky-500/20 rounded-full blur-lg"></div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-100 text-sm">3 месяца</span>
+                                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">-10% Выгода</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Экономия по сравнению с помесячной оплатой</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-extrabold text-emerald-400">129 ₽</span>
+                            <p class="text-[10px] text-slate-500 line-through">147 ₽</p>
+                        </div>
+                    </div>
+
+                    <!-- 12 MONTHS (-10%) -->
+                    <div onclick="selectTariff('12', 529, '12 месяцев (-10%)')" class="glass-card-interactive glass-card rounded-xl p-3.5 flex items-center justify-between border border-indigo-500/40 bg-indigo-950/20 cursor-pointer">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-100 text-sm">12 месяцев</span>
+                                <span class="text-[10px] bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded border border-indigo-500/30">Максимум</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Полный год максимальной безопасности</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-base font-extrabold text-indigo-400">529 ₽</span>
+                            <p class="text-[10px] text-slate-500 line-through">588 ₽</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRIAL BUTTON -->
+                <div class="mt-4 pt-3 border-t border-slate-800">
+                    <button id="trialBtn" onclick="activateTrial()" class="w-full glass-card-interactive bg-gradient-to-r from-rose-900 to-red-800 hover:from-rose-800 hover:to-red-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg border border-rose-500/30 text-xs">
+                        <i class="ph-bold ph-gift text-base"></i>
+                        <span id="trialBtnText">Активировать пробный период на 24 часа</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SETTINGS & CONTROLS -->
+        <section id="tabSettings" class="space-y-3 hidden">
+            <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i class="ph-bold ph-sliders text-sky-400 text-lg"></i> Параметры работы
+                </h3>
+
+                <!-- INCOGNITO MODE TOGGLE -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <div class="pr-2">
+                        <p class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="ph-bold ph-eye-slash text-indigo-400"></i> Инкогнито-режим
+                        </p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Скрывает ваши собственные удаленные сообщения от дублирования</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="incognitoToggle" onchange="toggleSetting('incognito')" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                    </label>
+                </div>
+
+                <!-- OLD MEDIA FILTER -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <div class="pr-2">
+                        <p class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="ph-bold ph-clock-counter-clockwise text-amber-400"></i> Детектор старого медиа
+                        </p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Предупреждает о старых пересланных файлах (>1 часа)</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="oldMediaToggle" checked onchange="toggleSetting('oldMedia')" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                    </label>
+                </div>
+
+                <!-- LOCATION SPAM PROTECTION -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <div class="pr-2">
+                        <p class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="ph-bold ph-map-pin text-emerald-400"></i> Фильтр Live-локации
+                        </p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Блокирует спам при регулярных обновлениях трансляции геопозиции</p>
+                    </div>
+                    <span class="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded border border-emerald-500/30">Активен</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: DEMO SIMULATION -->
+        <section id="tabDemo" class="space-y-3 hidden">
+            <div class="glass-card rounded-2xl p-4 border border-slate-800">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i class="ph-bold ph-lightning text-amber-400 text-lg"></i> Симуляция работы
+                    </h3>
+                    <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Live Preview</span>
+                </div>
+
+                <p class="text-xs text-slate-400 mb-3">Нажмите кнопки ниже, чтобы посмотреть, как бот пересылает вам измененные и удаленные сообщения собеседника в реальном времени.</p>
+
+                <!-- DEMO CONTROLS -->
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="triggerDemoEdit()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-sky-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5">
+                        <i class="ph-bold ph-pencil-simple"></i> Тест редактирования
+                    </button>
+                    <button onclick="triggerDemoDelete()" class="glass-card-interactive bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold py-2 px-3 rounded-xl text-xs border border-slate-700 flex items-center justify-center gap-1.5">
+                        <i class="ph-bold ph-trash"></i> Тест удаления
+                    </button>
+                </div>
+
+                <!-- SIMULATED BOT FEED -->
+                <div id="demoFeed" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-xs text-slate-400 text-center italic">
+                        Нажмите кнопку выше для проверки симуляции...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER INFO -->
+    <footer class="w-full text-center mt-4">
+        <p class="text-[11px] text-slate-500 font-medium">NotBlind Bot v2.4 • Telegram Business Automation</p>
+    </footer>
+
+    <!-- MODAL 1: PAYMENT CONFIRMATION -->
+    <div id="payModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="glass-card bg-slate-900 rounded-2xl max-w-xs w-full p-5 border border-slate-700 shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('payModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-sky-500/20 text-sky-400 rounded-full flex items-center justify-center mx-auto mb-2 text-xl border border-sky-500/30">
+                    <i class="ph-bold ph-credit-card"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-100">Оплата подписки</h3>
+                <p id="modalTariffName" class="text-xs text-slate-400 mt-1">Подписка на 1 месяц</p>
+            </div>
+
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800 mb-4 text-center">
+                <span class="text-xs text-slate-400 block mb-0.5">Сумма к оплате:</span>
+                <span id="modalAmount" class="text-2xl font-black text-emerald-400">49 ₽</span>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="executePayment()" class="w-full glass-card-interactive bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg text-xs">
+                    <i class="ph-bold ph-lock-key"></i> Перейти к оплате через Rollypay
+                </button>
+                <button onclick="closeModal('payModal')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-4 rounded-xl text-xs">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: TUTORIAL / GUIDANCE -->
+    <div id="tutorialModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="glass-card bg-slate-900 rounded-2xl max-w-xs w-full p-5 border border-slate-700 shadow-2xl relative">
+            <button onclick="closeModal('tutorialModal')" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+
+            <div class="mb-4">
+                <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                    <i class="ph-bold ph-youtube-logo text-rose-500 text-xl"></i> Быстрое подключение
+                </h3>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-300 leading-relaxed mb-4">
+                <div class="flex items-start gap-2.5">
+                    <span class="bg-sky-500/20 text-sky-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">1</span>
+                    <p>Нажмите зеленую кнопку <b>«Подключить»</b>. Вы перейдете в настройки вашего профиля.</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="bg-sky-500/20 text-sky-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">2</span>
+                    <p>Откройте пункт <b>«Чат-автоматизация»</b> (требуется Telegram Premium / Business).</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="bg-sky-500/20 text-sky-400 font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 text-[10px]">3</span>
+                    <p>В поле поиска введите юзернейм бот-ассистента: <code class="bg-slate-950 text-sky-300 px-1 py-0.5 rounded font-mono">@NotBlind_bot</code>.</p>
+                </div>
+            </div>
+
+            <button onclick="closeModal('tutorialModal')" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs">
+                Понятно, спасибо
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & TELEGRAM INTEGRATION -->
+    <script>
+        // Telegram WebApp Initialization
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.setHeaderColor('#0f172a');
+            tg.setBackgroundColor('#0f172a');
+        }
+
+        // State Management
+        let appState = {
+            trialActivated: false,
+            subActive: true,
+            subExpireHours: 24,
+            selectedTariff: null,
+            settings: {
+                incognito: false,
+                oldMedia: true
+            }
+        };
+
+        // Initialize User Data
+        window.addEventListener('DOMContentLoaded', () => {
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const u = tg.initDataUnsafe.user;
+                const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Пользователь';
+                document.getElementById('userName').innerText = name;
+                document.getElementById('userId').innerText = `ID: ${u.id}`;
+                
+                // Set Avatar Initials
+                const initials = (u.first_name?.[0] || 'N') + (u.last_name?.[0] || 'B');
+                document.getElementById('userAvatar').innerText = initials.toUpperCase();
+            } else {
+                // Standalone / Browser Fallback
+                document.getElementById('userName').innerText = 'Роман';
+                document.getElementById('userId').innerText = 'ID: 850527992';
+            }
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['tariffs', 'settings', 'demo'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+                const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+                
+                if (t === tabName) {
+                    el.classList.remove('hidden');
+                    btn.className = "flex-1 py-2 rounded-lg text-center font-semibold transition-all bg-sky-500 text-white shadow";
+                } else {
+                    el.classList.add('hidden');
+                    btn.className = "flex-1 py-2 rounded-lg text-center font-semibold transition-all text-slate-400 hover:text-slate-200";
+                }
             });
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            document.getElementById('btn-' + tab).classList.add('active');
         }
 
-        function toggleLiveLoc() {
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium');
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
         }
 
+        // Tariff Selection
+        function selectTariff(type, amount, name) {
+            appState.selectedTariff = { type, amount, name };
+            document.getElementById('modalTariffName').innerText = name;
+            document.getElementById('modalAmount').innerText = `${amount} ₽`;
+            openModal('payModal');
+        }
+
+        function executePayment() {
+            closeModal('payModal');
+            if (tg) {
+                tg.showPopup({
+                    title: 'Переход к оплате',
+                    message: `Вы запрашиваете ссылку на оплату тарифа "${appState.selectedTariff.name}" за ${appState.selectedTariff.amount} ₽.`,
+                    buttons: [{ type: 'ok', text: 'Продолжить' }]
+                });
+            } else {
+                alert(`Переход к оплате через Rollypay: ${appState.selectedTariff.amount} ₽`);
+            }
+        }
+
+        // Trial Activation Logic
         function activateTrial() {
-            tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success');
-            alert('Пробный период на 24 часа успешно активирован!');
+            if (appState.trialActivated) {
+                if (tg) tg.showAlert('Вы уже использовали пробный период!');
+                else alert('Вы уже использовали пробный период!');
+                return;
+            }
+
+            appState.trialActivated = true;
+            appState.subActive = true;
+            appState.subExpireHours = 24;
+
+            const btn = document.getElementById('trialBtn');
+            const btnText = document.getElementById('trialBtnText');
+            btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-xs";
+            btnText.innerText = "Пробный период уже активирован";
+
+            document.getElementById('subBadge').className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+            document.getElementById('subBadge').innerHTML = '<i class="ph-bold ph-check-circle mr-1"></i> Тест 24ч';
+            document.getElementById('subExpireText').innerText = 'Осталось: 24 ч.';
+
+            if (tg) tg.showAlert('🎉 Пробный период на 24 часа успешно активирован!');
+            else alert('🎉 Пробный период на 24 часа успешно активирован!');
         }
 
-        function selectTariff(months, price) {
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium');
-            alert(`Оформление подписки на ${months} мес. (${price} ₽)`);
+        // Toggle Settings
+        function toggleSetting(key) {
+            appState.settings[key] = !appState.settings[key];
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        // Live Demo Simulations
+        function triggerDemoEdit() {
+            const feed = document.getElementById('demoFeed');
+            const demoItem = document.createElement('div');
+            demoItem.className = "bg-slate-900/90 rounded-xl p-3 border border-slate-700/80 text-xs animate-fade-in shadow-md space-y-1.5";
+            demoItem.innerHTML = `
+                <div class="flex items-center justify-between text-amber-400 font-bold">
+                    <span class="flex items-center gap-1"><i class="ph-bold ph-pencil-simple"></i> Сообщение изменено!</span>
+                    <span class="text-[10px] text-slate-500 font-mono">17:51</span>
+                </div>
+                <div class="text-slate-300"><b>От:</b> Роман (@user) | ID: <code class="text-sky-300">850527992</code></div>
+                <div class="bg-rose-950/30 p-1.5 rounded border border-rose-900/40 text-rose-300"><b>🔴 Было:</b> Привет, встретимся в 18:00?</div>
+                <div class="bg-emerald-950/30 p-1.5 rounded border border-emerald-900/40 text-emerald-300"><b>🟢 Стало:</b> Извини, не смогу прийти</div>
+            `;
+            
+            if (feed.children[0]?.classList.contains('italic')) {
+                feed.innerHTML = '';
+            }
+            feed.prepend(demoItem);
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+        }
+
+        function triggerDemoDelete() {
+            const feed = document.getElementById('demoFeed');
+            const demoItem = document.createElement('div');
+            demoItem.className = "bg-slate-900/90 rounded-xl p-3 border border-rose-900/50 text-xs animate-fade-in shadow-md space-y-1.5";
+            demoItem.innerHTML = `
+                <div class="flex items-center justify-between text-rose-400 font-bold">
+                    <span class="flex items-center gap-1"><i class="ph-bold ph-trash"></i> Удаленное сообщение!</span>
+                    <span class="text-[10px] text-slate-500 font-mono">17:52</span>
+                </div>
+                <div class="text-slate-300"><b>От:</b> Роман (@user) | ID: <code class="text-sky-300">850527992</code></div>
+                <div class="bg-slate-950 p-2 rounded border border-slate-800 text-slate-200">💬 <b>Текст:</b> Секретный промокод: 994821</div>
+            `;
+            
+            if (feed.children[0]?.classList.contains('italic')) {
+                feed.innerHTML = '';
+            }
+            feed.prepend(demoItem);
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
         }
     </script>
 </body>
